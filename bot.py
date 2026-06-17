@@ -34,8 +34,12 @@ ferramenta_agendar = types.Tool(
                         type=types.Type.STRING, 
                         description="Data e hora no formato ISO 8601 (ex: 2026-06-18T14:00:00)"
                     ),
+                    "especialidade": types.Schema(
+                        type=types.Type.STRING, 
+                        description="Especialidade do atendimento (ex: Psicologia, Terapia Ocupacional (TO), Fisioterapia, Nutrição, Fonoaudiologia)"
+                    ),
                 },
-                required=["nome_paciente", "data_hora_iso"],
+                required=["nome_paciente", "data_hora_iso", "especialidade"],
             )
         )
     ]
@@ -60,9 +64,13 @@ async def responder_com_ia(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     config = types.GenerateContentConfig(
         system_instruction=(
-            "Você é um assistente simpático de uma clínica médica. O seu objetivo é ajudar o utilizador a marcar consultas. "
-            "Para fazer um agendamento, você DEVE perguntar e obter: o nome do paciente, a data e o horário. "
-            "Quando tiver estes dados, utilize a ferramenta 'agendar_consulta' para fixar o compromisso. "
+            "Você é o assistente virtual de uma clínica médica multidisciplinar. Comunique-se de forma direta, rápida, objetiva e profissional. "
+            "Evite textos longos ou conversacionais. "
+            "Antes de acionar a ferramenta de agendamento, você DEVE obter as seguintes informações do usuário: "
+            "1. Especialidade desejada (Psicologia, Terapia Ocupacional, Fisioterapia, Nutrição ou Fonoaudiologia) "
+            "2. Nome completo do paciente "
+            "3. Data e horário desejados para o atendimento. "
+            "Apenas após ter esses 3 dados, utilize a ferramenta 'agendar_consulta' para fixar o compromisso. "
             f"Importante: Hoje é {hoje}. Converta termos como 'amanhã' ou 'terça' para o formato ISO correto usando esta data base."
         ),
         tools=[ferramenta_agendar] 
@@ -88,17 +96,25 @@ async def responder_com_ia(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                     args = call.args
                     nome = args.get("nome_paciente")
                     data_hora = args.get("data_hora_iso")
+                    especialidade = args.get("especialidade")
                     
                     # Executa a integração com o Google Calendar
-                    sucesso = agendar_consulta(nome_paciente=nome, data_hora_iso=data_hora)
+                    resultado = agendar_consulta(nome_paciente=nome, data_hora_iso=data_hora, especialidade=especialidade)
                     
-                    if sucesso:
+                    if resultado == "sucesso":
                         await update.message.reply_text(
-                            f"Confirmado! Consulta agendada com sucesso para {nome}.\n"
+                            f"Confirmado! Consulta de {especialidade} agendada com sucesso para {nome}.\n"
                             f"Data/Hora: {data_hora}"
                         )
                         # Limpa o histórico após concluir o agendamento
                         del memoria_usuarios[user_id] 
+                    elif resultado == "conflito":
+                        tool_response = types.Part.from_function_response(
+                            name="agendar_consulta",
+                            response={"erro": "Horário indisponível. O agendamento falhou. Informe isso e peça para o paciente escolher outro horário ou data."}
+                        )
+                        nova_resposta_ia = chat.send_message(tool_response)
+                        await update.message.reply_text(nova_resposta_ia.text)
                     else:
                         await update.message.reply_text(
                             "Tive uma dificuldade técnica ao acessar a agenda. Por favor, tente novamente."
