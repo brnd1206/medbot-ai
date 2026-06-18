@@ -2,7 +2,7 @@
 
 Este é um assistente virtual (ChatBot) desenvolvido em Python para o Telegram. O objetivo do bot é automatizar o agendamento de consultas de uma clínica médica multidisciplinar. O bot utiliza Inteligência Artificial por meio da nova SDK do **Google Gemini (`google-genai`)** para conduzir o diálogo de forma profissional e objetiva, coletando os dados necessários do paciente e, em seguida, utiliza **Function Calling** para marcar as consultas diretamente no **Google Calendar**.
 
-## ✨ Funcionalidades
+## Funcionalidades
 
 - **Atendimento Automatizado e Inteligente:** O bot conduz o paciente, perguntando de forma direta:
   1. A especialidade desejada (Psicologia, Terapia Ocupacional, Fisioterapia, Nutrição ou Fonoaudiologia).
@@ -11,7 +11,7 @@ Este é um assistente virtual (ChatBot) desenvolvido em Python para o Telegram. 
 - **Integração com Google Calendar:** Ao obter os 3 dados, o bot verifica se o horário está disponível e agenda automaticamente a consulta no calendário.
 - **Prevenção de Conflitos de Agenda:** Se o paciente tentar marcar em um horário já ocupado, o bot negará educadamente e pedirá para que o paciente escolha outro horário.
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 - **Python 3**
 - **python-telegram-bot:** Para interagir com a API do Telegram.
@@ -19,7 +19,7 @@ Este é um assistente virtual (ChatBot) desenvolvido em Python para o Telegram. 
 - **google-api-python-client** e **google-auth:** Para interagir com a API do Google Calendar.
 - **python-dotenv:** Para gerenciamento de variáveis de ambiente de forma segura.
 
-## 🚀 Como instalar e executar o projeto
+## Como instalar e executar o projeto
 
 ### 1. Preparar os arquivos
 Certifique-se de que todos os arquivos do projeto (como `bot.py` e `agenda.py`) estão na mesma pasta.
@@ -64,7 +64,7 @@ python bot.py
 ```
 Se tudo estiver correto, você verá no terminal: `Bot rodando! Pressione Ctrl+C para parar.`. Pronto! Basta buscar o seu bot no Telegram e mandar um "Olá" para agendar uma consulta.
 
-## 📂 Estrutura de Arquivos
+## Estrutura de Arquivos
 - `bot.py`: Código principal responsável por conectar ao Telegram e engajar na IA (Gemini).
 - `agenda.py`: Código focado apenas em conversar e validar com o Google Calendar.
 - `credentials.json`: Arquivo de autorização da conta de serviço do Google (você deve gerar e adicionar).
