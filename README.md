@@ -1,4 +1,4 @@
-# ChatBot de Agendamento - Clínica Multidisciplinar
+# Medbot AI
 
 Este é um assistente virtual (ChatBot) desenvolvido em Python para o Telegram. O objetivo do bot é automatizar o agendamento de consultas de uma clínica médica multidisciplinar. O bot utiliza Inteligência Artificial por meio da nova SDK do **Google Gemini (`google-genai`)** para conduzir o diálogo de forma profissional e objetiva, coletando os dados necessários do paciente e, em seguida, utiliza **Function Calling** para marcar as consultas diretamente no **Google Calendar**.
 
