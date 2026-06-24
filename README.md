@@ -144,6 +144,3 @@ MedBot AI rodando! Pressione Ctrl+C para parar.
 ```
 
 Pronto! Abra o Telegram, envie `/start` e converse com o assistente.
-
-| `service_account.json` | Credenciais privadas do Google |
-| `agendamentos.db` | Dados de pacientes |
