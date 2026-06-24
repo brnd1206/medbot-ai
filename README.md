@@ -65,7 +65,7 @@ O Groq decide qual ferramenta acionar com base na intenção do usuário:
 ### 1. Clone o repositório e entre na pasta
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/brnd1206/medbot-ai
 cd medbot-ai
 ```
 
