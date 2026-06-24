@@ -145,24 +145,5 @@ MedBot AI rodando! Pressione Ctrl+C para parar.
 
 Pronto! Abra o Telegram, envie `/start` e converse com o assistente.
 
----
-
-## Verificando os agendamentos no banco de dados
-
-O arquivo `agendamentos.db` é criado automaticamente na pasta do projeto. Para visualizar os registros:
-
-```bash
-sqlite3 agendamentos.db "SELECT * FROM agendamentos;"
-```
-
-Ou use o [DB Browser for SQLite](https://sqlitebrowser.org/) — gratuito e visual.
-
----
-
-## Arquivos sensíveis — nunca suba ao Git
-
-| Arquivo | Motivo |
-|---|---|
-| `.env` | Contém tokens e chaves de API |
 | `service_account.json` | Credenciais privadas do Google |
 | `agendamentos.db` | Dados de pacientes |
