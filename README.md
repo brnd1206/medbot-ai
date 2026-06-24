@@ -1,71 +1,168 @@
-# Medbot AI
+# MedBot AI
 
-Este é um assistente virtual (ChatBot) desenvolvido em Python para o Telegram. O objetivo do bot é automatizar o agendamento de consultas de uma clínica médica multidisciplinar. O bot utiliza Inteligência Artificial por meio da nova SDK do **Google Gemini (`google-genai`)** para conduzir o diálogo de forma profissional e objetiva, coletando os dados necessários do paciente e, em seguida, utiliza **Function Calling** para marcar as consultas diretamente no **Google Calendar**.
+Assistente virtual para o **Telegram** que automatiza o gerenciamento de consultas de uma clínica médica multidisciplinar. O bot utiliza **Inteligência Artificial via API do Groq** com **Tool Use (Function Calling)** para conduzir diálogos profissionais e realizar ações reais: agendar, consultar, remarcar e cancelar consultas, integrando **SQLite** e **Google Calendar** simultaneamente.
+
+---
 
 ## Funcionalidades
 
-- **Atendimento Automatizado e Inteligente:** O bot conduz o paciente, perguntando de forma direta:
-  1. A especialidade desejada (Psicologia, Terapia Ocupacional, Fisioterapia, Nutrição ou Fonoaudiologia).
-  2. O nome completo do paciente.
-  3. A data e horário desejados.
-- **Integração com Google Calendar:** Ao obter os 3 dados, o bot verifica se o horário está disponível e agenda automaticamente a consulta no calendário.
-- **Prevenção de Conflitos de Agenda:** Se o paciente tentar marcar em um horário já ocupado, o bot negará educadamente e pedirá para que o paciente escolha outro horário.
+- **Agendar consulta** — o bot coleta especialidade, nome do paciente e data/hora, confirma com o usuário e registra a consulta
+- **Consultar agendamento** — o paciente pode verificar qual consulta possui agendada
+- **Remarcar consulta** — cancela o horário antigo e agenda um novo, tanto no banco quanto no Google Calendar
+- **Cancelar (desmarcar) consulta** — remove o registro do banco e o evento do Google Calendar
+- **Prevenção de conflitos** — verifica disponibilidade no Google Calendar antes de confirmar qualquer agendamento
+- **Histórico de conversa por usuário** — cada usuário tem seu próprio contexto de chat
+- **Conversa iniciada via `/start`** — o bot só responde após o usuário iniciar a sessão
+
+---
 
 ## Tecnologias Utilizadas
 
-- **Python 3**
-- **python-telegram-bot:** Para interagir com a API do Telegram.
-- **google-genai:** Nova SDK do Gemini para processamento de linguagem natural e Function Calling.
-- **google-api-python-client** e **google-auth:** Para interagir com a API do Google Calendar.
-- **python-dotenv:** Para gerenciamento de variáveis de ambiente de forma segura.
+| Tecnologia | Uso |
+|---|---|
+| Python 3.10+ | Linguagem principal |
+| [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) | Interface com a API do Telegram |
+| [groq](https://pypi.org/project/groq/) | Cliente oficial da API do Groq (LLM + Tool Use) |
+| sqlite3 | Banco de dados local (já incluso no Python) |
+| [google-api-python-client](https://pypi.org/project/google-api-python-client/) | Integração com o Google Calendar |
+| [google-auth](https://pypi.org/project/google-auth/) | Autenticação via Conta de Serviço |
+| python-dotenv | Gerenciamento seguro de variáveis de ambiente |
 
-## Como instalar e executar o projeto
+---
 
-### 1. Preparar os arquivos
-Certifique-se de que todos os arquivos do projeto (como `bot.py` e `agenda.py`) estão na mesma pasta.
+## Estrutura de Arquivos
 
-### 2. Criar e ativar um ambiente virtual (Recomendado)
-Para evitar conflito de versões de pacotes no seu computador, crie um ambiente virtual:
+```
+medbot-ai/
+├── main.py              # Ponto de entrada — inicializa o banco e o bot
+├── bot_handlers.py      # Rotas e handlers do Telegram
+├── ai_service.py        # Comunicação com a API do Groq + Tool Use (4 ferramentas)
+├── database.py          # Funções SQLite (inicializar, inserir, buscar, deletar)
+├── calendar_service.py  # Integração com o Google Calendar (criar, cancelar eventos)
+├── requirements.txt     # Dependências do projeto
+├── .env.example         # Modelo do arquivo de configuração
+├── service_account.json # Credenciais da Conta de Serviço Google (você deve gerar)
+└── agendamentos.db      # Gerado automaticamente na primeira execução
+```
+
+---
+
+## Arquitetura — Tool Use (Function Calling)
+
+O Groq decide qual ferramenta acionar com base na intenção do usuário:
+
+| Ferramenta | Quando é acionada |
+|---|---|
+| `agendar_consulta` | Usuário quer marcar uma nova consulta |
+| `consultar_agendamento` | Usuário quer ver o horário agendado |
+| `remarcar_agendamento` | Usuário quer mudar data/hora |
+| `cancelar_agendamento` | Usuário quer desmarcar a consulta |
+
+---
+
+## Como instalar e executar
+
+### 1. Clone o repositório e entre na pasta
+
+```bash
+git clone <url-do-repositorio>
+cd medbot-ai
+```
+
+### 2. Crie e ative o ambiente virtual
+
 ```bash
 python -m venv venv
 
-# Para ativar no Windows:
+# Windows
 venv\Scripts\activate
 
-# Para ativar no Mac/Linux:
+# Mac / Linux
 source venv/bin/activate
 ```
 
-### 3. Instalar as dependências do Python (pip)
-Com o ambiente virtual ativado, instale todos os pacotes necessários de uma vez copiando e colando o comando abaixo:
+### 3. Instale as dependências
+
 ```bash
-pip install python-dotenv google-genai python-telegram-bot google-auth google-api-python-client
+pip install -r requirements.txt
 ```
 
-### 4. Configurar as Credenciais e o arquivo `.env`
-O projeto precisa de algumas chaves para funcionar. Crie um arquivo chamado `.env` na raiz do projeto e preencha com as suas chaves reais:
+### 4. Configure as variáveis de ambiente
+
+Copie o arquivo de exemplo e preencha com os seus valores:
+
+```bash
+# Windows
+copy .env.example .env
+
+# Mac / Linux
+cp .env.example .env
+```
+
+Edite o arquivo `.env`:
 
 ```env
-TELEGRAM_TOKEN=seu_token_do_botfather_do_telegram
-GEMINI_API_KEY=sua_chave_do_google_ai_studio
+TELEGRAM_TOKEN=seu_token_do_botfather_aqui
+GROQ_API_KEY=sua_chave_groq_aqui
+GROQ_MODEL=llama-3.3-70b-versatile
 CLINICA_CALENDAR_ID=id_do_calendario@group.calendar.google.com
 ```
 
-Você também precisará autorizar o código a ler e gravar na agenda do Google:
-1. Acesse o Google Cloud Console, crie um projeto e ative a **Google Calendar API**.
-2. Crie uma **Conta de Serviço (Service Account)** e gere uma chave em formato JSON.
-3. Baixe e salve esse arquivo na raiz do projeto com o nome de `credentials.json`.
-4. Vá no seu Google Calendar original, acesse as Configurações da sua clínica e compartilhe a agenda com o *e-mail da conta de serviço* que você criou, dando permissões de fazer alterações em eventos.
+> **Como obter a GROQ_API_KEY:**
+> 1. Acesse [console.groq.com](https://console.groq.com)
+> 2. Crie uma conta gratuita
+> 3. Vá em **API Keys → Create API Key** e copie a chave gerada
 
-### 5. Executar o Bot
-Para ligar o assistente, digite no terminal (com o ambiente virtual ainda ativado):
+> **Como obter o TELEGRAM_TOKEN:**
+> 1. Abra o Telegram e procure por `@BotFather`
+> 2. Envie `/newbot` e siga as instruções
+> 3. Copie o token gerado
+
+### 5. Configure a integração com o Google Calendar
+
+1. Acesse o [Google Cloud Console](https://console.cloud.google.com)
+2. Crie um projeto e ative a **Google Calendar API**
+3. Vá em **IAM & Admin → Contas de serviço → Criar conta de serviço**
+4. Gere uma chave em formato **JSON** e salve na raiz do projeto como `service_account.json`
+5. No Google Calendar, acesse as **Configurações** da agenda da clínica
+6. Em **Compartilhar com pessoas específicas**, adicione o e-mail da conta de serviço com permissão para **fazer alterações em eventos**
+7. Copie o **ID do calendário** (em "Integrar agenda") e cole no `.env`
+
+> O `CLINICA_CALENDAR_ID` é opcional. Se não configurado, o bot continua funcionando e salva apenas no SQLite local.
+
+### 6. Execute o bot
+
 ```bash
-python bot.py
+python main.py
 ```
-Se tudo estiver correto, você verá no terminal: `Bot rodando! Pressione Ctrl+C para parar.`. Pronto! Basta buscar o seu bot no Telegram e mandar um "Olá" para agendar uma consulta.
 
-## Estrutura de Arquivos
-- `bot.py`: Código principal responsável por conectar ao Telegram e engajar na IA (Gemini).
-- `agenda.py`: Código focado apenas em conversar e validar com o Google Calendar.
-- `credentials.json`: Arquivo de autorização da conta de serviço do Google (você deve gerar e adicionar).
-- `.env`: Variáveis sensíveis do seu projeto (você deve criar e adicionar).
+Se tudo estiver correto, você verá no terminal:
+
+```
+[DB] Banco de dados inicializado com sucesso.
+MedBot AI rodando! Pressione Ctrl+C para parar.
+```
+
+Pronto! Abra o Telegram, envie `/start` e converse com o assistente.
+
+---
+
+## Verificando os agendamentos no banco de dados
+
+O arquivo `agendamentos.db` é criado automaticamente na pasta do projeto. Para visualizar os registros:
+
+```bash
+sqlite3 agendamentos.db "SELECT * FROM agendamentos;"
+```
+
+Ou use o [DB Browser for SQLite](https://sqlitebrowser.org/) — gratuito e visual.
+
+---
+
+## Arquivos sensíveis — nunca suba ao Git
+
+| Arquivo | Motivo |
+|---|---|
+| `.env` | Contém tokens e chaves de API |
+| `service_account.json` | Credenciais privadas do Google |
+| `agendamentos.db` | Dados de pacientes |

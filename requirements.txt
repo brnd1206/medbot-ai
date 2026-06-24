@@ -1,0 +1,5 @@
+python-dotenv
+groq
+python-telegram-bot
+google-auth
+google-api-python-client

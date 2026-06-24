@@ -1,4 +1,16 @@
+# Variáveis de ambiente
 .env
+
+# Banco de dados SQLite gerado automaticamente
+agendamentos.db
+
+# Ambiente virtual Python
 venv/
+
+# Cache do Python
 __pycache__/
-credentials.json
+*.pyc
+*.pyo
+
+# Credenciais da Conta de Serviço do Google
+service_account.json
