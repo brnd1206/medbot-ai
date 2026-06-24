@@ -89,16 +89,6 @@ pip install -r requirements.txt
 
 ### 4. Configure as variáveis de ambiente
 
-Copie o arquivo de exemplo e preencha com os seus valores:
-
-```bash
-# Windows
-copy .env.example .env
-
-# Mac / Linux
-cp .env.example .env
-```
-
 Edite o arquivo `.env`:
 
 ```env
